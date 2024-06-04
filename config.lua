@@ -4,8 +4,11 @@ Config.SQL = 'oxmysql' --- oxmysql or ghmattisql
 
 Config.Eye = "true" 
 
-Config.PedModel = "a_m_m_farmer_01" 
-Config.PedHash = 0x94562DD7  
+Config.PedModel = "a_m_m_farmer_01"
+Config.PedHash = 0x94562DD7
+
+Config.MinReward = 124
+Config.MaxReward = 177
 
 Config.Seller = {
     coords = vector4(1551.04, 2189.86, 77.84, 0.89),
@@ -56,11 +59,11 @@ Config.Items = {
 }
 
 Config.ProcessName = {
-    ['pickflower'] = 'Picking Flowers...',
-    ['proflowers'] = 'Processing Flowers...',
-    ['packflowers'] = 'Packing Flowers...',
-    ['sellflowers'] = 'Selling Flowers...',
-    ['openshop'] = 'Open Shop',
+    ['pickflower'] = 'Picking Roses',
+    ['proflowers'] = 'Wrapping Roses into Bouquet',
+    ['packflowers'] = 'Packinging Bouquet',
+    ['sellflowers'] = 'Selling Box of Roses',
+    ['openshop'] = 'Opening Flourist Shop',
 }
 
 Config.ProcessTime = {
@@ -72,9 +75,35 @@ Config.ProcessTime = {
 }
 
 Config.Notify = {
-    ['cancel'] = "Cancelled..",
-    ['bucket'] = "You Dont Have Bucket..",
-    ['no_item'] = "You Dont Have Right Items..",
-    ['no_sell_item'] = "You dont have Flower Boxes..",
-    ['openshop'] = "Opened Shop.."
+    ['cancel'] = "Cancelled",
+    ['bucket'] = "You need a bucket to hold roses",
+    ['no_item'] = "You don't have the right items",
+    ['no_sell_item'] = "You don't have any rose boxes",
+    ['openshop'] = "Shop Opened"
 }
+
+--[[ Time to pick 1 flower = 5 seconds
+Time to pick 10 flowers for 1 bouquet = 10 * 5 = 50 seconds
+
+Time to create 1 bouquet = 5 seconds
+
+Time to package 1 bouquet into a flower box = 5 seconds
+
+Time to sell 1 flower box = 4 seconds
+
+Total time per flower box = Time to pick flowers + Time to create bouquet + Time to package bouquet + Time to sell flower box
+Total time per flower box = 50 seconds + 5 seconds + 5 seconds + 4 seconds = 64 seconds
+
+For $7,000 per hour:
+Target Rate per box = Target Rate per hour / (3600 seconds / 64 seconds)
+Target Rate per box = $7,000 / (3600 / 64)
+Target Rate per box ≈ $7,000 / 56.25
+Target Rate per box ≈ $124.44
+
+For $10,000 per hour:
+Target Rate per box = $10,000 / (3600 / 64)
+Target Rate per box ≈ $10,000 / 56.25
+Target Rate per box ≈ $177.78
+
+So, to achieve a target hourly income of $7,000, each flower box should sell for approximately $124.44,
+and to achieve a target hourly income of $10,000, each flower box should sell for approximately $177.78. ]]

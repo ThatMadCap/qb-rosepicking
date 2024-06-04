@@ -5,7 +5,15 @@ local Seller = Config.Seller.coords
 local PedModel = Config.PedModel
 local PedHash = Config.PedHash
 
-CreateThread(function()
+-- Function to Load Animation Dictionary
+local function LoadAnimDict(dict)
+    while (not HasAnimDictLoaded(dict)) do
+        RequestAnimDict(dict)
+        Citizen.Wait(1)
+    end
+end
+
+--[[ CreateThread(function()
     for k, garden in pairs(Config.Locations["garden"]) do
         local blip = AddBlipForCoord(garden.coords.x, garden.coords.y, garden.coords.z)
         SetBlipSprite(blip, 587)
@@ -29,25 +37,27 @@ CreateThread(function()
         AddTextComponentString(floseller.label)
         EndTextCommandSetBlipName(blip)
     end
-end)
+end) ]]
 
 -------------------------flower-------------------------
 RegisterNetEvent("qb-flowerjob:client:flowerpick")
 AddEventHandler("qb-flowerjob:client:flowerpick", function ()
     QBCore.Functions.TriggerCallback('qb-flowerjob:server:get:bucket', function(hasItem)
         if hasItem then
+            local playerPed = PlayerPedId() -- Used by the function closures below
+            LoadAnimDict('anim@gangops@facility@servers@')
+            TaskPlayAnim(playerPed, 'anim@gangops@facility@servers@', 'hotwire', 8.0, 1.0, -1, 49, 0, 0, 0, 0)
+
             QBCore.Functions.Progressbar('search_flower', Config.ProcessName['pickflower'], Config.ProcessTime['pickflower'], false, true, {
                 disableMovement = true,
                 disableCarMovement = true,
                 disableMouse = false,
                 disableCombat = true,
             }, {
-                animDict = 'anim@gangops@facility@servers@',
-                anim = 'hotwire',
-                flags = 16,
             }, {}, {}, function() -- Play When Done
                 TriggerServerEvent("qb-flowerjob:server:flowerpick")
                 ClearPedTasks(playerPed)
+                StopAnimTask(playerPed, 'anim@gangops@facility@servers@', 'hotwire', 1.0)
             end, function ()
                 QBCore.Functions.Notify(Config.Notify['cancel'], "error")
             end)
@@ -62,18 +72,23 @@ RegisterNetEvent("qb-flowerjob:client:processflo")
 AddEventHandler("qb-flowerjob:client:processflo", function ()
     QBCore.Functions.TriggerCallback('qb-flowerjob:server:get:processflo', function(hasItem)
         if hasItem then
+            local playerPed = PlayerPedId() -- Used by the function closures below
+            LoadAnimDict('anim@gangops@facility@servers@')
+            TaskPlayAnim(playerPed, 'anim@gangops@facility@servers@', 'hotwire', 8.0, 1.0, -1, 49, 0, 0, 0, 0)
+            
             QBCore.Functions.Progressbar('process_flo', Config.ProcessName['proflowers'], Config.ProcessTime['proflowers'], false, true, { 
                 disableMovement = true,
                 disableCarMovement = true,
                 disableMouse = false,
                 disableCombat = true,
             }, {
-                animDict = 'anim@gangops@facility@servers@',
-                anim = 'hotwire',
-                flags = 16,
             }, {}, {}, function() -- Play When Done
                 TriggerServerEvent("qb-flowerjob:server:processflo")
+                ClearPedTasks(playerPed)
+                StopAnimTask(playerPed, 'anim@gangops@facility@servers@', 'hotwire', 1.0)
             end, function ()
+                ClearPedTasks(playerPed)
+                StopAnimTask(playerPed, 'anim@gangops@facility@servers@', 'hotwire', 1.0)
                 QBCore.Functions.Notify(Config.Notify['cancel'], "error")
             end)
         elseif not hasItem then
@@ -87,20 +102,25 @@ RegisterNetEvent("qb-flowerjob:client:packingflo")
 AddEventHandler("qb-flowerjob:client:packingflo", function ()
     QBCore.Functions.TriggerCallback('qb-flowerjob:server:get:packingflo', function (hasItem)
         if hasItem then
+            local playerPed = PlayerPedId() -- Used by the function closures below
+            LoadAnimDict('anim@gangops@facility@servers@')
+            TaskPlayAnim(playerPed, 'anim@gangops@facility@servers@', 'hotwire', 8.0, 1.0, -1, 49, 0, 0, 0, 0)
+            
             QBCore.Functions.Progressbar('pack', Config.ProcessName['packflowers'], Config.ProcessTime['packflowers'], false, true, { -- Name | Label | Time | useWhileDead | canCancel
                 disableMovement = true,
                 disableCarMovement = true,
                 disableMouse = false,
                 disableCombat = true,
             }, {
-                animDict = 'anim@gangops@facility@servers@',
-                anim = 'hotwire',
-                flags = 16,
             }, {}, {}, function() -- Play When Done
+                ClearPedTasks(playerPed)
+                StopAnimTask(playerPed, 'anim@gangops@facility@servers@', 'hotwire', 1.0)
                 TriggerServerEvent("qb-flowerjob:server:packingflo")
             end, function() -- Play When Cancel
                 --Stuff goes here
                 QBCore.Functions.Notify(Config.Notify['cancel'], "error")
+                ClearPedTasks(playerPed)
+                StopAnimTask(playerPed, 'anim@gangops@facility@servers@', 'hotwire', 1.0)
             end)
         elseif not hasItem then    
             QBCore.Functions.Notify(Config.Notify['no_item'], 'error', 5000)
@@ -159,7 +179,7 @@ AddEventHandler("qb-flowerjob:client:openshop", function ()
         TriggerEvent('animations:client:EmoteCommandStart', {"c"})
         TriggerEvent('qb-flowerjob:shop')
         ClearPedTasks(playerPed)
-        QBCore.Functions.Notify(Config.Notify['openshop'])
+        --QBCore.Functions.Notify(Config.Notify['openshop'])
     end, function ()
         QBCore.Functions.Notify(Config.Notify['cancel'], "error")
     end)
@@ -183,8 +203,8 @@ Citizen.CreateThread(function ()
         options = {
             {
                 event = "qb-flowerjob:client:flowerpick",
-                icon = "fas fa-circle",
-                label = "Pick Flowers",
+                icon = "fa-solid fa-seedling",
+                label = "Pick Roses",
             },
         },
         distance = 2
@@ -199,8 +219,8 @@ Citizen.CreateThread(function ()
         options = {
             {
                 event = "qb-flowerjob:client:flowerpick",
-                icon = "fas fa-circle",
-                label = "Pick Flowers",
+                icon = "fa-solid fa-seedling",
+                label = "Pick Roses",
             },
         },
         distance = 2
@@ -215,8 +235,8 @@ Citizen.CreateThread(function ()
         options = {
             {
                 event = "qb-flowerjob:client:flowerpick",
-                icon = "fas fa-circle",
-                label = "Pick Flowers",
+                icon = "fa-solid fa-seedling",
+                label = "Pick Roses",
             },
         },
         distance = 2
@@ -231,8 +251,8 @@ Citizen.CreateThread(function ()
         options = {
             {
                 event = "qb-flowerjob:client:flowerpick",
-                icon = "fas fa-circle",
-                label = "Pick Flowers",
+                icon = "fa-solid fa-seedling",
+                label = "Pick Roses",
             },
         },
         distance = 2
@@ -247,8 +267,8 @@ Citizen.CreateThread(function ()
         options = {
             {
                 event = "qb-flowerjob:client:flowerpick",
-                icon = "fas fa-circle",
-                label = "Pick Flowers",
+                icon = "fa-solid fa-seedling",
+                label = "Pick Roses",
             },
         },
         distance = 2
@@ -263,13 +283,13 @@ Citizen.CreateThread(function ()
         options = {
             {
                 event = "qb-flowerjob:client:processflo",
-                icon = "fas fa-circle",
-                label = "Process Flowers",
+                icon = "fa-solid fa-scroll",
+                label = "Wrap 10 Roses into Bouquet",
             },
             {
                 event = "qb-flowerjob:client:packingflo",
-                icon = "fas fa-circle",
-                label = "Packing Flowers",
+                icon = "fa-solid fa-box-open",
+                label = "Package Bouquet",
             },
         },
         distance = 2
@@ -284,13 +304,13 @@ Citizen.CreateThread(function ()
         options = {
             {
                 event = "qb-flowerjob:client:processflo",
-                icon = "fas fa-circle",
-                label = "Process Flowers",
+                icon = "fa-solid fa-scroll",
+                label = "Wrap 10 Roses into Bouquet",
             },
             {
                 event = "qb-flowerjob:client:packingflo",
-                icon = "fas fa-circle",
-                label = "Packing Flowers",
+                icon = "fa-solid fa-box-open",
+                label = "Package Bouquet",
             },
         },
         distance = 2
@@ -305,13 +325,13 @@ Citizen.CreateThread(function ()
         options = {
             {
                 event = "qb-flowerjob:client:processflo",
-                icon = "fas fa-circle",
-                label = "Process Flowers",
+                icon = "fa-solid fa-scroll",
+                label = "Wrap 10 Roses into Bouquet",
             },
             {
                 event = "qb-flowerjob:client:packingflo",
-                icon = "fas fa-circle",
-                label = "Packing Flowers",
+                icon = "fa-solid fa-box-open",
+                label = "Package Bouquet",
             },
         },
         distance = 2
@@ -326,8 +346,8 @@ Citizen.CreateThread(function ()
         options = {
             {
                 event = "qb-flowerjob:client:sellflower",
-                icon = "fas fa-circle",
-                label = "Sell Flowers",
+                icon = "fa-solid fa-dollar-sign",
+                label = "Sell Box of Roses",
             },
         },
         distance = 2
@@ -348,4 +368,20 @@ Citizen.CreateThread(function ()
         },
         distance = 2
     })
+end)
+
+-- usable items
+
+local holdingflower = false
+
+RegisterNetEvent('qb-flowerjob:client:flower', function()
+	exports["rpemotes"]:EmoteCommandStart("rose", 1)
+end)
+
+RegisterNetEvent('qb-flowerjob:client:bouquet', function()
+	exports["rpemotes"]:EmoteCommandStart("bouquet2", 1)
+end)
+
+RegisterNetEvent('qb-flowerjob:client:box', function()
+	exports["rpemotes"]:EmoteCommandStart("box", 1)
 end)

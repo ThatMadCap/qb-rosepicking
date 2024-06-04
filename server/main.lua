@@ -18,7 +18,7 @@ AddEventHandler("qb-flowerjob:server:flowerpick", function()
     local Player = QBCore.Functions.GetPlayer(src)
         Player.Functions.AddItem("flower", 1)
         TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items["flower"], "add")
-        TriggerClientEvent('QBCore:Notify', src, 'Picked your flowers.', "success")
+        TriggerClientEvent('QBCore:Notify', src, 'Picked a Rose', "success")
 end)
 
 -----------------------flower--process--------------------------
@@ -39,14 +39,21 @@ RegisterServerEvent('qb-flowerjob:server:processflo', function()
     local source = source
     local Player = QBCore.Functions.GetPlayer(tonumber(source))
     local flower = 1
-    Player.Functions.RemoveItem('flower', 2)
-    Player.Functions.RemoveItem('flower_paper', 1)
-    TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items['flower'], "remove")
-    TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items['flower_paper'], "remove")
-    Wait(1000)
-    Player.Functions.AddItem('flower_bulck', flower)
-    TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items['flower_bulck'], "add")
-    TriggerClientEvent('QBCore:Notify', source, "Successfully ", "success")
+
+    if not Player.Functions.RemoveItem('flower', 10)
+    then
+        TriggerClientEvent('QBCore:Notify', source, "You need 10 flowers to make a bouquet", "error")
+    else
+        Player.Functions.RemoveItem('flower_paper', 1)
+        TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items['flower'], "remove")
+        TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items['flower_paper'], "remove")
+        Wait(500)
+        Player.Functions.AddItem('flower_bulck', flower)
+        TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items['flower_bulck'], "add")
+
+        TriggerClientEvent('QBCore:Notify', source, "Wrapped up flowers into a Bouquet", "success")
+    end
+
 end)
 
 ---------------------packing flower-------------------
@@ -74,7 +81,7 @@ RegisterServerEvent('qb-flowerjob:server:packingflo', function()
     Wait(1000)
     Player.Functions.AddItem('flower_box', amount)
     TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items['flower_box'], "add")
-    TriggerClientEvent('QBCore:Notify', source, "Successfully ", "success")
+    TriggerClientEvent('QBCore:Notify', source, "Packaged Bouquet", "success")
 end)
 
 -------------------------seller-------------------------------
@@ -97,13 +104,13 @@ AddEventHandler('qb-flowerjob:server:sellflower', function()
    
 	
 	if Item == nil then
-       TriggerClientEvent('QBCore:Notify', source, 'You dont have Flower Boxes', "error")  
+       TriggerClientEvent('QBCore:Notify', source, 'You dont have Flower Boxes', "error")
 	else
 	 for k, v in pairs(Config.Prices) do
         
 		
 		if Item.amount > 0 then
-            local reward = math.random(400, 450)
+            local reward = math.random(Config.MinReward, Config.MaxReward)
             -- for i = 1, Item.amount do
             --     --reward = reward + math.random(v[1], v[2])
             --     reward = reward + math.random(1, 2)
@@ -111,9 +118,23 @@ AddEventHandler('qb-flowerjob:server:sellflower', function()
 			xPlayer.Functions.RemoveItem('flower_box', 1)
 			TriggerClientEvent("inventory:client:ItemBox", source, QBCore.Shared.Items['flower_box'], "remove")
 			xPlayer.Functions.AddMoney("cash", reward, "sold-pawn-items")
-			TriggerClientEvent('QBCore:Notify', source, 'Successfully Selling.', "success")  
+			TriggerClientEvent('QBCore:Notify', source, 'Sold Box of Roses', "success")
 			--end
         end
      end
 	end
+end)
+
+-- usable item
+
+QBCore.Functions.CreateUseableItem("flower", function(source, item)
+    TriggerClientEvent("qb-flowerjob:client:flower", source, item.name)
+end)
+
+QBCore.Functions.CreateUseableItem("flower_bulck", function(source, item)
+    TriggerClientEvent("qb-flowerjob:client:bouquet", source, item.name)
+end)
+
+QBCore.Functions.CreateUseableItem("flower_box", function(source, item)
+    TriggerClientEvent("qb-flowerjob:client:box", source, item.name)
 end)
